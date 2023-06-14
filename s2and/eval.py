@@ -433,7 +433,7 @@ def pairwise_eval(
     classifier: Any,
     figs_path: str,
     title: str,
-    shap_feature_names: List[str],
+    shap_feature_names: List[str] = [],
     thresh_for_f1: float = 0.5,
     shap_plot_type: Optional[str] = "dot",
     nameless_classifier: Optional[Any] = None,
@@ -477,6 +477,7 @@ def pairwise_eval(
     -------
     Dict: A dictionary of common pairwise metrics.
     """
+    
     if not os.path.exists(figs_path):
         os.makedirs(figs_path)
 
@@ -579,23 +580,24 @@ def pairwise_eval(
                 plt.clf()
                 plt.close()
         else:
-            plt.figure(2)
-            shap.summary_plot(
-                shap_values,
-                X,
-                plot_type=shap_plot_type,
-                feature_names=shap_feature_names,
-                show=False,
-                max_display=len(shap_feature_names),
-            )
-            # plt.title(f"SHAP Values for {title}")
-            plt.tight_layout()
-            plt.savefig(join(figs_path, base_name + "_shap.png"))
-            plt.clf()
-            plt.close()
+            # plt.figure(2)
+            # shap.summary_plot(
+            #     shap_values,
+            #     X,
+            #     plot_type=shap_plot_type,
+            #     feature_names=shap_feature_names,
+            #     show=False,
+            #     max_display=len(shap_feature_names),
+            # )
+            # # plt.title(f"SHAP Values for {title}")
+            # plt.tight_layout()
+            # plt.savefig(join(figs_path, base_name + "_shap.png"))
+            # plt.clf()
+            # plt.close()
+            pass
 
     # collect metrics and return
-    pr, rc, f1, _ = precision_recall_fscore_support(y, y_prob > thresh_for_f1, beta=1.0, average="macro")
+    pr, rc, f1, _ = precision_recall_fscore_support(y, y_prob > thresh_for_f1, beta=1.0, average="macro", zero_division=1)
     metrics = {
         "AUROC": np.round(roc_auc, 3),
         "Average Precision": np.round(avg_precision, 3),

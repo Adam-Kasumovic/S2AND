@@ -427,8 +427,8 @@ def _single_pair_featurize(work_input: Tuple[str, str], index: int = -1) -> Tupl
     features.append(
         np.minimum(
             diff(
-                paper_1.year if paper_1.year is not None and paper_1.year > 0 else None,
-                paper_2.year if paper_2.year is not None and paper_2.year > 0 else None,
+                int(paper_1.year) if paper_1.year is not None and int(paper_1.year) > 0 else None,
+                int(paper_2.year) if paper_2.year is not None and int(paper_2.year) > 0 else None,
             ),
             50,
         )
