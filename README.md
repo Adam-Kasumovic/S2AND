@@ -1,3 +1,12 @@
+# Using this fork
+First, following installation instructions below.
+After using my Redshift SQL query to pull papers from the database to a file called *raw_signatures.json*,
+running *process_signatures.py* will create the *clusters.json* (ground truth) and *signatures.json* files, as well as some other JSONs used for creating the *papers.json* file in *create_papers.py*, which should be run after. These JSONs (all three) can be used in *adam_train.py* to train a clusterer model, returning precision, recall, and F1-score metrics. They (*signatures.json* and *papers.json*) can also be used in inference, returning a dictionary of author names (with number suffixes for duplicate names) to lists of signature IDs they are predicted to have contributed to on the papers. Inference can be run with a resulting clusterer model pickle file (or the provided production model) using *adam_test2.py*. 
+
+*adam_prediction_test.py* can be used to test if your setup is working for S2AND inference.
+
+--------------------------------------------------------------------------------
+
 # S2AND
 This repository provides access to the S2AND dataset and S2AND reference model described in the paper [S2AND: A Benchmark and Evaluation System for Author Name Disambiguation](https://api.semanticscholar.org/CorpusID:232233421) by Shivashankar Subramanian, Daniel King, Doug Downey, Sergey Feldman.
 
