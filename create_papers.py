@@ -15,6 +15,8 @@ with open('raw_signatures.json', 'r') as f:
 with open(f'author_id_mappings.json', 'r') as f:  # get mappings of author ids to names
     author_id_to_name = json.load(f)
 
+print("NUMBER OF UNIQUE PAPERS:", len(all_papers))
+print("NUMBER OF UNIQUE AUTHORS WITH ORCID IDs:", len(author_id_to_name))
 
 # reads a line at a time from an s3 bucket JSON file
 def read_file_from_s3(bucket_name, key):
@@ -44,7 +46,7 @@ for page in pages:
         file_name = obj['Key']
         if file_name.endswith('.json'):
             print("READING FILE:", file_name)
-            for file_content in read_file_from_s3(bucket_name, file_name):
+            for line_num, file_content in enumerate(read_file_from_s3(bucket_name, file_name)):
                 rid_val = file_content['rid']
                 rid = int(rid_val[rid_val.rfind('_')+1:])  # need to match signatures paper id and chop off leading 0
                 year = file_content.get('publication_date')
@@ -64,8 +66,10 @@ for page in pages:
                     papers_dict[str(rid)]['authors'].append({"position": len(papers_dict[str(rid)]['authors']),
                                                              "author_name": author_name})
                     #print("AUTHOR ADDED, PIECE NOW LOOKS LIKE:", papers_dict[str(rid)])
+                if line_num % 10000 == 0:
+                    print("LINE NUMBER:", line_num)
 
-print("SIZE OF RESULT:", len(papers_dict))
+            print("SIZE OF RESULT:", len(papers_dict))
 
 with open(f'data/{output_folder}/{output_folder}_papers.json', 'w') as f:
     json.dump(papers_dict, f)
