@@ -1,18 +1,33 @@
 import json
 from collections import defaultdict
+from random import randint
 
 output_folder = "adam-orcids"
+number_of_authored_instances = 7883119  # Get this from the DB. It is the number of signatures with 'authored' relationship type used for random sampling
+number_to_sample = 10000  # Approximate number of signatures to sample.
+
+with open('aff_map.json', 'r') as f:
+    aff_map = json.load(f)
 
 # TODO: Split this up into pieces so no memory overflow
 # Read signatures from DB
 # Map author ids to list of affiliations
 author_to_affiliations = defaultdict(set)
+affiliation_name_missing_cnt = 0
+affiliation_name_present_cnt = 0
 with open('raw_signatures.json', 'r') as f:
     for signature in f:
         signature = json.loads(signature)
 
         if signature['relationship_type'] == 'affiliated with':
-            author_to_affiliations[signature['author_id']].add(signature['name'])
+            aff_name = aff_map.get(signature['other_id'])
+            if aff_name is not None:
+                author_to_affiliations[signature['author_id']].add(aff_name)
+                affiliation_name_present_cnt += 1
+            else:
+                affiliation_name_missing_cnt += 1
+
+print(f"{affiliation_name_present_cnt} affiliations added to {len(author_to_affiliations)} authors. Number of missing affiliations: {affiliation_name_missing_cnt}")
 
 # Convert set values to lists
 a2a = defaultdict(list)
@@ -27,7 +42,7 @@ author_id_to_name = {}
 with open('raw_signatures.json', 'r') as f:
     for signature in f:
         signature = json.loads(signature)
-        if signature['relationship_type'] == 'authored':
+        if signature['relationship_type'] == 'authored' and randint(1, number_of_authored_instances) <= number_to_sample:  # randomly sample 10000 signatures
             signature_id += 1
             str_sid = str(signature_id)
             author_id_original = signature['author_id']
