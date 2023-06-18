@@ -16,6 +16,7 @@ from functools import reduce
 from collections import defaultdict
 
 import numpy as np
+from scipy import stats
 import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -495,6 +496,13 @@ def pairwise_eval(
         y_prob = classifier.predict_proba(X)[:, 1]
 
     # plot AUROC
+    np.savetxt('y.txt', y, fmt='%.2f', delimiter=',')
+    np.savetxt('y_p.txt', y_prob, fmt='%.2f', delimiter=',')
+    # Calculate the mode of the array without nan values
+    mode = stats.mode(y[~np.isnan(y)])[0][0]
+
+    # Replace nan values with the mode
+    y[np.isnan(y)] = mode
     fpr, tpr, _ = roc_curve(y, y_prob)
     roc_auc = auc(fpr, tpr)
 
@@ -651,6 +659,11 @@ def b3_precision_recall_fscore(true_clus, pred_clus, skip_signatures=None):
 
     tcset = set(reduce(lambda x, y: x + y, true_clusters.values()))
     pcset = set(reduce(lambda x, y: x + y, pred_clusters.values()))
+
+    print(tcset - pcset)
+    print("\n\n\n")
+    print(pcset-tcset)
+    print("\n\n\n")
 
     if tcset != pcset:
         raise ValueError("Predictions do not cover all the signatures!")

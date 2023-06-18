@@ -1,16 +1,12 @@
 import boto3
 import json
+import pickle
 
 output_folder = "adam-orcids"
 
 # first, get a set of all the papers and name mappings
-all_papers = set()
-
-with open('raw_signatures.json', 'r') as f:
-    for signature in f:
-        signature = json.loads(signature)
-        if signature['relationship_type'] == 'authored':
-            all_papers.add(signature['other_id'])
+with open('sampled_papers.pkl', 'rb') as f:
+    all_papers = pickle.load(f)
 
 with open(f'author_id_mappings.json', 'r') as f:  # get mappings of author ids to names
     author_id_to_name = json.load(f)
@@ -54,7 +50,7 @@ for page in pages:
                     year = int(year[:4])
                 author_name = author_id_to_name.get(file_content.get('x_rid'))
                 authors_list = [{"position": 0, "author_name": author_name}] if author_name is not None else []
-                if str(rid) not in papers_dict:  # TODO: Figure out how to get abstract, references from SQL table reliably
+                if str(rid) not in papers_dict:
                     starting_piece = {"paper_id": rid, "title": file_content.get('element_content'),
                                              "abstract": "", "journal_name": file_content.get('publisher_name'),
                                              "venue": file_content.get('publisher_name'),

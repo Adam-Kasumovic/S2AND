@@ -140,3 +140,10 @@ foo-*
 *.png
 *.cpp
 *.bin
+x_train.txt
+x_val.txt
+y.txt
+y_p.txt
+y_prob.txt
+y_train.txt
+y_val.txt

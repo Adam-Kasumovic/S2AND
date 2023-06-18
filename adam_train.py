@@ -23,7 +23,7 @@ from s2and.eval import pairwise_eval, cluster_eval
 
 featurization_info = FeaturizationInfo()
 # the cache will make it faster to train multiple times - it stores the features on disk for you
-train, val, test = featurize(dataset, featurization_info, n_jobs=8, use_cache=True)
+train, val, test = featurize(dataset, featurization_info, n_jobs=8, use_cache=False)
 X_train, y_train, _ = train
 X_val, y_val, _ = val
 X_test, y_test, _ = test

@@ -441,92 +441,93 @@ class ANDData:
         nothing, modifies self.signatures
         """
         for signature_id, signature in tqdm(self.signatures.items(), desc="Preprocessing signatures"):
-            # our normalization scheme is to normalize first and middle separately,
-            # join them, then take the first token of the combined join
-            first_normalized = normalize_text(signature.author_info_first or "")
-            first_normalized_without_apostrophe = normalize_text(
-                signature.author_info_first or "", special_case_apostrophes=True
-            )
-
-            middle_normalized = normalize_text(signature.author_info_middle or "")
-            first_middle_normalized_split = (first_normalized + " " + middle_normalized).split(" ")
-            if first_middle_normalized_split[0] in NAME_PREFIXES:
-                first_middle_normalized_split = first_middle_normalized_split[1:]
-            first_middle_normalized_split_without_apostrophe = (
-                first_normalized_without_apostrophe + " " + middle_normalized
-            ).split(" ")
-            if first_middle_normalized_split_without_apostrophe[0] in NAME_PREFIXES:
-                first_middle_normalized_split_without_apostrophe = first_middle_normalized_split_without_apostrophe[1:]
-
-            coauthors: Optional[List[str]] = None
-            if len(self.papers) != 0:
-                paper = self.papers[str(signature.paper_id)]
-                coauthors = [
-                    author.author_name for author in paper.authors if author.position != signature.author_info_position
-                ]
-
-            signature = signature._replace(
-                author_info_first_normalized=first_middle_normalized_split[0],
-                author_info_first_normalized_without_apostrophe=first_middle_normalized_split_without_apostrophe[0],
-                author_info_middle_normalized=" ".join(first_middle_normalized_split[1:]),
-                author_info_middle_normalized_without_apostrophe=" ".join(
-                    first_middle_normalized_split_without_apostrophe[1:]
-                ),
-                author_info_last_normalized=normalize_text(signature.author_info_last),
-                author_info_suffix_normalized=normalize_text(signature.author_info_suffix or ""),
-                author_info_coauthors=set(coauthors) if coauthors is not None else None,
-                author_info_coauthor_blocks=set([compute_block(author) for author in coauthors])
-                if coauthors is not None
-                else None,
-            )
-
-            if self.preprocess:
-                affiliations = [normalize_text(affiliation) for affiliation in signature.author_info_affiliations]
-                affiliations_n_grams = get_text_ngrams_words(
-                    " ".join(affiliations),
-                    AFFILIATIONS_STOP_WORDS,
+            if str(signature.paper_id) in self.papers:
+                # our normalization scheme is to normalize first and middle separately,
+                # join them, then take the first token of the combined join
+                first_normalized = normalize_text(signature.author_info_first or "")
+                first_normalized_without_apostrophe = normalize_text(
+                    signature.author_info_first or "", special_case_apostrophes=True
                 )
 
-                email_prefix = (
-                    signature.author_info_email.split("@")[0]
-                    if signature.author_info_email is not None and len(signature.author_info_email) > 0
-                    else None
-                )
+                middle_normalized = normalize_text(signature.author_info_middle or "")
+                first_middle_normalized_split = (first_normalized + " " + middle_normalized).split(" ")
+                if first_middle_normalized_split[0] in NAME_PREFIXES:
+                    first_middle_normalized_split = first_middle_normalized_split[1:]
+                first_middle_normalized_split_without_apostrophe = (
+                    first_normalized_without_apostrophe + " " + middle_normalized
+                ).split(" ")
+                if first_middle_normalized_split_without_apostrophe[0] in NAME_PREFIXES:
+                    first_middle_normalized_split_without_apostrophe = first_middle_normalized_split_without_apostrophe[1:]
 
-                if load_name_counts:
-                    first_last_for_count = (
-                        signature.author_info_first_normalized + " " + signature.author_info_last_normalized
-                    ).strip()
-                    first_initial = (
-                        signature.author_info_first_normalized
-                        if len(signature.author_info_first_normalized) > 0
-                        else ""
-                    )
-                    last_first_initial_for_count = (signature.author_info_last_normalized + " " + first_initial).strip()
-                    counts = NameCounts(
-                        first=self.first_dict.get(signature.author_info_first_normalized, 1)
-                        if len(signature.author_info_first_normalized) > 1
-                        else np.nan,
-                        last=self.last_dict.get(signature.author_info_last_normalized, 1),
-                        first_last=self.first_last_dict.get(first_last_for_count, 1)
-                        if len(signature.author_info_first_normalized) > 1
-                        else np.nan,
-                        last_first_initial=self.last_first_initial_dict.get(last_first_initial_for_count, 1),
-                    )
-                else:
-                    counts = NameCounts(first=None, last=None, first_last=None, last_first_initial=None)
+                coauthors: Optional[List[str]] = None
+                if len(self.papers) != 0:
+                    paper = self.papers[str(signature.paper_id)]
+                    coauthors = [
+                        author.author_name for author in paper.authors if author.position != signature.author_info_position
+                    ]
 
                 signature = signature._replace(
-                    author_info_full_name=ANDData.get_full_name_for_features(signature).strip(),
-                    author_info_affiliations=affiliations,
-                    author_info_affiliations_n_grams=affiliations_n_grams,
-                    author_info_coauthor_n_grams=get_text_ngrams(" ".join(coauthors), stopwords=None, use_bigrams=True)
+                    author_info_first_normalized=first_middle_normalized_split[0],
+                    author_info_first_normalized_without_apostrophe=first_middle_normalized_split_without_apostrophe[0],
+                    author_info_middle_normalized=" ".join(first_middle_normalized_split[1:]),
+                    author_info_middle_normalized_without_apostrophe=" ".join(
+                        first_middle_normalized_split_without_apostrophe[1:]
+                    ),
+                    author_info_last_normalized=normalize_text(signature.author_info_last),
+                    author_info_suffix_normalized=normalize_text(signature.author_info_suffix or ""),
+                    author_info_coauthors=set(coauthors) if coauthors is not None else None,
+                    author_info_coauthor_blocks=set([compute_block(author) for author in coauthors])
                     if coauthors is not None
-                    else Counter(),
-                    author_info_email_prefix_ngrams=get_text_ngrams(email_prefix, stopwords=None, use_bigrams=True),
-                    author_info_name_counts=counts,
+                    else None,
                 )
-            self.signatures[signature_id] = signature
+
+                if self.preprocess:
+                    affiliations = [normalize_text(affiliation) for affiliation in signature.author_info_affiliations]
+                    affiliations_n_grams = get_text_ngrams_words(
+                        " ".join(affiliations),
+                        AFFILIATIONS_STOP_WORDS,
+                    )
+
+                    email_prefix = (
+                        signature.author_info_email.split("@")[0]
+                        if signature.author_info_email is not None and len(signature.author_info_email) > 0
+                        else None
+                    )
+
+                    if load_name_counts:
+                        first_last_for_count = (
+                            signature.author_info_first_normalized + " " + signature.author_info_last_normalized
+                        ).strip()
+                        first_initial = (
+                            signature.author_info_first_normalized
+                            if len(signature.author_info_first_normalized) > 0
+                            else ""
+                        )
+                        last_first_initial_for_count = (signature.author_info_last_normalized + " " + first_initial).strip()
+                        counts = NameCounts(
+                            first=self.first_dict.get(signature.author_info_first_normalized, 1)
+                            if len(signature.author_info_first_normalized) > 1
+                            else np.nan,
+                            last=self.last_dict.get(signature.author_info_last_normalized, 1),
+                            first_last=self.first_last_dict.get(first_last_for_count, 1)
+                            if len(signature.author_info_first_normalized) > 1
+                            else np.nan,
+                            last_first_initial=self.last_first_initial_dict.get(last_first_initial_for_count, 1),
+                        )
+                    else:
+                        counts = NameCounts(first=None, last=None, first_last=None, last_first_initial=None)
+
+                    signature = signature._replace(
+                        author_info_full_name=ANDData.get_full_name_for_features(signature).strip(),
+                        author_info_affiliations=affiliations,
+                        author_info_affiliations_n_grams=affiliations_n_grams,
+                        author_info_coauthor_n_grams=get_text_ngrams(" ".join(coauthors), stopwords=None, use_bigrams=True)
+                        if coauthors is not None
+                        else Counter(),
+                        author_info_email_prefix_ngrams=get_text_ngrams(email_prefix, stopwords=None, use_bigrams=True),
+                        author_info_name_counts=counts,
+                    )
+                self.signatures[signature_id] = signature
 
     @staticmethod
     def maybe_load_json(path_or_json: Optional[Union[str, Union[List, Dict]]]) -> Any:
@@ -1092,8 +1093,9 @@ class ANDData:
         cluster_to_signatures = defaultdict(list)
         for signatures in block_dict.values():
             for signature in signatures:
-                true_cluster_id = self.signature_to_cluster_id[signature]
-                cluster_to_signatures[true_cluster_id].append(signature)
+                if signature in self.signature_to_cluster_id:
+                    true_cluster_id = self.signature_to_cluster_id[signature]
+                    cluster_to_signatures[true_cluster_id].append(signature)
 
         return dict(cluster_to_signatures)
 
@@ -1239,7 +1241,7 @@ class ANDData:
             for _, signatures in blocks.items():
                 for i, s1 in enumerate(signatures):
                     for s2 in signatures[i + 1 :]:
-                        if self.signature_to_cluster_id is not None:
+                        if self.signature_to_cluster_id is not None and s1 in self.signature_to_cluster_id and s2 in self.signature_to_cluster_id:
                             s1_cluster = self.signature_to_cluster_id[s1]
                             s2_cluster = self.signature_to_cluster_id[s2]
                             if s1_cluster == s2_cluster:

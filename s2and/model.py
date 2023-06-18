@@ -16,6 +16,7 @@ import math
 
 import numpy as np
 from scipy.cluster.hierarchy import fcluster
+from scipy import stats
 from hyperopt import hp, fmin, tpe, Trials, space_eval
 from hyperopt.pyll import scope
 from fastcluster import linkage
@@ -846,8 +847,40 @@ class PairwiseModeler:
             def obj(params):
                 params = {k: intify(v) for k, v in params.items()}
                 self.estimator.set_params(**params)
+
+                # Check if all values in a column are nan
+                nan_cols = np.all(np.isnan(X_train), axis=0)
+
+                # Replace nan values in those columns with 0
+                X_train[:, nan_cols] = 0
+
+                # Calculate the mean of each column, ignoring NaNs
+                col_mean = np.nanmean(X_train, axis=0)
+
+                # Find indices where nan values are located
+                inds = np.where(np.isnan(X_train))
+
+                # Replace inds with the corresponding mean of the column
+                X_train[inds] = np.take(col_mean, inds[1])
+
+                # Calculate the mode of the array without nan values
+                mode = stats.mode(y_train[~np.isnan(y_train)])[0][0]
+
+                # Replace nan values with the mode
+                y_train[np.isnan(y_train)] = mode
+
+                np.savetxt('x_train.txt', X_train, fmt='%.2f', delimiter=',')
+                np.savetxt('y_train.txt', y_train, fmt='%.2f', delimiter=',')
                 self.estimator.fit(X_train, y_train)
                 y_pred_proba = self.estimator.predict_proba(X_val)[:, 1]
+                np.savetxt('x_val.txt', X_val, fmt='%.2f', delimiter=',')
+                np.savetxt('y_prob.txt', y_pred_proba, fmt='%.2f', delimiter=',')
+                np.savetxt('y_val.txt', y_val, fmt='%.2f', delimiter=',')
+                # Calculate the mode of the array without nan values
+                mode = stats.mode(y_val[~np.isnan(y_val)])[0][0]
+
+                # Replace nan values with the mode
+                y_val[np.isnan(y_val)] = mode
                 return -roc_auc_score(y_val, y_pred_proba)
 
             self.hyperopt_trials_store = Trials()

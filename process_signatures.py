@@ -1,10 +1,12 @@
 import json
 from collections import defaultdict
-from random import randint
+from random import randint, seed
+import pickle
+seed(42)
 
 output_folder = "adam-orcids"
 number_of_authored_instances = 7883119  # Get this from the DB. It is the number of signatures with 'authored' relationship type used for random sampling
-number_to_sample = 10000  # Approximate number of signatures to sample.
+number_to_sample = 200000  # Approximate number of signatures to sample.
 
 with open('aff_map.json', 'r') as f:
     aff_map = json.load(f)
@@ -39,6 +41,7 @@ signature_id = 0
 result_signatures = {}
 orcid_to_signatures = defaultdict(list)
 author_id_to_name = {}
+all_papers = set()
 with open('raw_signatures.json', 'r') as f:
     for signature in f:
         signature = json.loads(signature)
@@ -49,6 +52,7 @@ with open('raw_signatures.json', 'r') as f:
             author_id_chunks = author_id_original.split('_')
             author_id = int(author_id_chunks[-3] + author_id_chunks[-1])
             paper_id_val = signature['other_id']
+            all_papers.add(paper_id_val)
             paper_id = int(paper_id_val[paper_id_val.rfind('_')+1:])
             first_name = signature['first_name']
             middle_name = signature['middle_name']
@@ -90,3 +94,7 @@ with open(f'data/{output_folder}/{output_folder}_clusters.json', 'w') as f:
 
 with open(f'author_id_mappings.json', 'w') as f:
     json.dump(author_id_to_name, f)
+
+# Write pickle file of sampled papers
+with open('sampled_papers.pkl', 'wb') as f:
+    pickle.dump(all_papers, f, protocol=pickle.HIGHEST_PROTOCOL)
