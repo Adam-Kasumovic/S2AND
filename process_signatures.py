@@ -6,7 +6,7 @@ seed(42)
 
 output_folder = "adam-orcids"
 number_of_authored_instances = 7883119  # Get this from the DB. It is the number of signatures with 'authored' relationship type used for random sampling
-number_to_sample = 200000  # Approximate number of signatures to sample.
+number_to_sample = 250000  # Approximate number of signatures to sample.
 
 with open('aff_map.json', 'r') as f:
     aff_map = json.load(f)
