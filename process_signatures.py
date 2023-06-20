@@ -5,6 +5,7 @@ import pickle
 seed(42)
 
 output_folder = "adam-orcids"
+sampling = False
 number_of_authored_instances = 7883119  # Get this from the DB. It is the number of signatures with 'authored' relationship type used for random sampling
 number_to_sample = 250000  # Approximate number of signatures to sample.
 
@@ -45,7 +46,7 @@ all_papers = set()
 with open('raw_signatures.json', 'r') as f:
     for signature in f:
         signature = json.loads(signature)
-        if signature['relationship_type'] == 'authored' and randint(1, number_of_authored_instances) <= number_to_sample:  # randomly sample 10000 signatures
+        if signature['relationship_type'] == 'authored' and (not sampling or randint(1, number_of_authored_instances) <= number_to_sample):  # randomly sample signatures
             signature_id += 1
             str_sid = str(signature_id)
             author_id_original = signature['author_id']
