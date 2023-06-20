@@ -496,8 +496,8 @@ def pairwise_eval(
         y_prob = classifier.predict_proba(X)[:, 1]
 
     # plot AUROC
-    np.savetxt('y.txt', y, fmt='%.2f', delimiter=',')
-    np.savetxt('y_p.txt', y_prob, fmt='%.2f', delimiter=',')
+    #np.savetxt('y.txt', y, fmt='%.2f', delimiter=',')
+    #np.savetxt('y_p.txt', y_prob, fmt='%.2f', delimiter=',')
     # Calculate the mode of the array without nan values
     mode = stats.mode(y[~np.isnan(y)])[0][0]
 

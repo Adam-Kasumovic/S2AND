@@ -869,13 +869,13 @@ class PairwiseModeler:
                 # Replace nan values with the mode
                 y_train[np.isnan(y_train)] = mode
 
-                np.savetxt('x_train.txt', X_train, fmt='%.2f', delimiter=',')
-                np.savetxt('y_train.txt', y_train, fmt='%.2f', delimiter=',')
+                #np.savetxt('x_train.txt', X_train, fmt='%.2f', delimiter=',')
+                #np.savetxt('y_train.txt', y_train, fmt='%.2f', delimiter=',')
                 self.estimator.fit(X_train, y_train)
                 y_pred_proba = self.estimator.predict_proba(X_val)[:, 1]
-                np.savetxt('x_val.txt', X_val, fmt='%.2f', delimiter=',')
-                np.savetxt('y_prob.txt', y_pred_proba, fmt='%.2f', delimiter=',')
-                np.savetxt('y_val.txt', y_val, fmt='%.2f', delimiter=',')
+                #np.savetxt('x_val.txt', X_val, fmt='%.2f', delimiter=',')
+                #np.savetxt('y_prob.txt', y_pred_proba, fmt='%.2f', delimiter=',')
+                #np.savetxt('y_val.txt', y_val, fmt='%.2f', delimiter=',')
                 # Calculate the mode of the array without nan values
                 mode = stats.mode(y_val[~np.isnan(y_val)])[0][0]
 
