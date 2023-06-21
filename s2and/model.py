@@ -772,7 +772,7 @@ class PairwiseModeler:
         search_space: Optional[Dict[str, Any]] = None,
         monotone_constraints: Optional[str] = None,
         n_iter: int = 50,
-        n_jobs: int = 16,  # for the model, not the hyperopt
+        n_jobs: int = 64,  # for the model, not the hyperopt
         random_state: int = 42,
     ):
         if estimator is None:
