@@ -23,6 +23,7 @@ def run(path_to_data, dataset_name="pubmed", batch_size=100000000, use_cache=Tru
         name="your_name_here",
         mode="inference",
         block_type="s2",
+        n_jobs=n_jobs,
     )
     pred_clusters, pred_distance_matrices = clusterer.predict(anddata.get_blocks(), anddata)
     # print("CLUSTERS")
