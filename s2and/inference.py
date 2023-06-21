@@ -4,7 +4,7 @@ import pprint
 from s2and.data import ANDData
 
 
-def run(path_to_data, dataset_name="pubmed"):
+def run(path_to_data, dataset_name="pubmed", batch_size=100000000, use_cache=True, n_jobs=96):
     parent_dir = join(path_to_data, dataset_name)
 
     signatures = join(parent_dir, f"{dataset_name}_signatures.json")
@@ -12,6 +12,10 @@ def run(path_to_data, dataset_name="pubmed"):
 
     with open(join(path_to_data, "production_model.pickle"), "rb") as _pkl_file:
         clusterer = pickle.load(_pkl_file)['clusterer']
+
+    clusterer.batch_size = batch_size
+    clusterer.use_cache = use_cache
+    clusterer.n_jobs = n_jobs
 
     anddata = ANDData(
         signatures=signatures,
