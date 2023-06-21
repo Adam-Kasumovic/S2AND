@@ -5,6 +5,27 @@ running *process_signatures.py* will create the *clusters.json* (ground truth) a
 
 *adam_prediction_test.py* can be used to test if your setup is working for S2AND inference.
 
+## Creating input JSON files
+First, consult with Ghamut to receive the appropriate queries to generate the necessary files on S3.
+
+Following this, place *raw_signatures.json* in the root directory and just run the Python scripts to do the rest.
+
+### Running the JSON-creating Python scripts
+If *aff_map.json* is not present or provided to you, run
+*create_ror_map.py* and then *create_aff_map.py*. This will take several hours. It is used to map institution IDs to ROR affiliation names using S2AFF results.
+
+The first script to run is *process_signatures.py*. This will create the initial signatures and clusters JSON files as well as some intermediate files.
+
+Next, if *abstracts.json* is not present or provided to you, run *create_abstracts.py*. This will take many hours.
+
+The second script to run is *create_papers.py*. This creates the initial *papers.json* file. It will take many hours.
+
+Following this, you should run *add_abstracts.py* and *add_citations.py* to add abstracts and citations to the *papers.json* file, respectively.
+
+Finally, you should run *prune_signatures.py* to ensure that S2AND will properly process the input JSON files. 
+
+When finished, you will have three, valid S2AND-ready input JSON files (in *data/adam-orcids* by default)!
+
 --------------------------------------------------------------------------------
 
 # S2AND
