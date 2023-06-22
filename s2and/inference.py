@@ -4,10 +4,10 @@ import pprint
 from s2and.data import ANDData
 
 
-def run(path_to_data, dataset_name="pubmed", batch_size=100000000, use_cache=True, n_jobs=64):
+def run(signatures, path_to_data, dataset_name="pubmed", batch_size=100000000, use_cache=True, n_jobs=64):
     parent_dir = join(path_to_data, dataset_name)
 
-    signatures = join(parent_dir, f"{dataset_name}_signatures.json")
+    #signatures = join(parent_dir, f"{dataset_name}_signatures.json")
     papers = join(parent_dir, f"{dataset_name}_papers.json")
 
     with open(join(path_to_data, "production_model.pickle"), "rb") as _pkl_file:
