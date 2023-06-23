@@ -1,5 +1,5 @@
 from typing import Optional, Union, Dict, List, Any, Tuple, Set, NamedTuple
-
+import time
 import os
 import json
 import numpy as np
@@ -359,13 +359,18 @@ class ANDData:
             name_counts_loaded = True
         elif load_name_counts:
             logger.info("loading name counts")
-            with open(cached_path(NAME_COUNTS_PATH), "rb") as f:
-                (
-                    first_dict,
-                    last_dict,
-                    first_last_dict,
-                    last_first_initial_dict,
-                ) = pickle.load(f)
+            while True:
+                try:
+                    with open(cached_path(NAME_COUNTS_PATH), "rb") as f:
+                        (
+                            first_dict,
+                            last_dict,
+                            first_last_dict,
+                            last_first_initial_dict,
+                        ) = pickle.load(f)
+                    break
+                except:
+                    time.sleep(1)
             self.first_dict = first_dict
             self.last_dict = last_dict
             self.first_last_dict = first_last_dict
